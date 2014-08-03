@@ -29,6 +29,8 @@ def main(argv=False):
                         help='template file or directory')
     parser.add_argument('-s', '--seed', type=int,
                         help='random generator seed value')
+    parser.add_argument('-o', '--output', type=int,
+                        help='random generator seed value')
 
     try:
         args = parser.parse_args(argv)
