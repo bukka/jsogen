@@ -1,7 +1,8 @@
 #!/usr/bin/env python
-import os
-import sys
 import argparse
+import os
+from os.path import join
+import sys
 from template import Template
 
 class TemplateGenerator:
@@ -22,17 +23,13 @@ class TemplateGenerator:
         template.generate()
 
     def _walk(self):
-        base_tdir = self.args.template_dir.rstrip('/')
-        base_tdir_len = len(base_tdir)
-        base_odir = self.args.output_dir.rstrip('/')
         for root, dirs, files in os.walk(self.args.template_dir):
-            if not root.endswith("/"):
-                root += "/";
-            odir = base_odir + root[base_tdir_len:]
-            for tdir in (t for t in dirs if not os.path.isdir(odir + t)):
-                os.mkdir(odir + tdir)
+            root_common_dir = root[len(self.args.template_dir):]
+            outdir = join(self.args.output_dir, root_common_dir)
+            for tdir in (t for t in dirs if not os.path.isdir(join(outdir, t))):
+                os.mkdir(join(outdir, tdir))
             for tfile in files:
-                self._generate(root + tfile, odir + tfile)
+                self._generate(join(root, tfile), join(outdir, tfile))
 
     def run(self):
         if self.args.template:
