@@ -2,8 +2,48 @@
 import os
 import sys
 import argparse
+from template import Template
 
-class TemplateAction(argparse.Action):
+class TemplateGenerator:
+    """Generate template from supplied arguments
+
+    Template generator expects parameters processed
+    by argparse in the main function."""
+
+    def __init__(self, args):
+        self.args = args
+
+    def _generate(self, path=None, output=None):
+        if not output:
+            output = self.args.output
+        if not path:
+            path = self.args.template
+        template = Template(path=path, output=output, seed=self.args.seed)
+        template.generate()
+
+    def _walk(self):
+        base_tdir = self.args.template_dir.rstrip('/')
+        base_tdir_len = len(base_tdir)
+        base_odir = self.args.output_dir.rstrip('/')
+        for root, dirs, files in os.walk(self.args.template_dir):
+            if not root.endswith("/"):
+                root += "/";
+            odir = base_odir + root[base_tdir_len:]
+            for tdir in (t for t in dirs if not os.path.isdir(odir + t)):
+                os.mkdir(odir + tdir)
+            for tfile in files:
+                self._generate(root + tfile, odir + tfile)
+
+    def run(self):
+        if self.args.template:
+            self._generate(self.args.template, self.args.output)
+        else:
+            self._walk()
+
+
+class DirOrFileAction(argparse.Action):
+    """ArgumentParser action for template parameter"""
+
     def __call__(self, parser, namespace, values, option_string=None):
         path = values
         if os.path.isfile(path):
@@ -11,7 +51,7 @@ class TemplateAction(argparse.Action):
             setattr(namespace, self.dest, values)
         elif os.path.isdir(path):
             self.checkReadAcces(path, 'directory')
-            setattr(namespace, self.dest, values)
+            setattr(namespace, self.dest + '_dir', values)
         else:
             raise argparse.ArgumentTypeError("Template path '%s' is neither file nor directory" % path)
 
@@ -25,11 +65,11 @@ def main(argv=False):
 
     parser = argparse.ArgumentParser(description='JavaScript Object Generator')
 
-    parser.add_argument('template', action=TemplateAction,
+    parser.add_argument('template', action=DirOrFileAction,
                         help='template file or directory')
     parser.add_argument('-s', '--seed', type=int,
                         help='random generator seed value')
-    parser.add_argument('-o', '--output', type=int,
+    parser.add_argument('-o', '--output', action=DirOrFileAction,
                         help='random generator seed value')
 
     try:
@@ -38,7 +78,13 @@ def main(argv=False):
         print(exc)
         return -1
 
-    print(args)
+    # allow template directory only if output is set
+    if not args.template and not "output_dir" in args:
+        print("Output must be supplied if template is directory")
+        return -1
+
+    gen = TemplateGenerator(args)
+    gen.run()
 
     return 0
 
