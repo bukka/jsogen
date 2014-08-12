@@ -6,10 +6,15 @@ import sys
 class Template:
     """Template for generating JSON"""
 
-    def __init__(self, path, output, seed=None):
+    def __init__(self, path, output, seed=None, quiet=False):
         self.seed = seed or random.randint(1, 1000)
         self.path = path
         self.output = output
+        self.quiet = quiet
+
+    def _debug(self, message):
+        if not self.quiet:
+            print(message)
 
     def _print(self, content):
         self.ohandle.write(str(content))
@@ -22,7 +27,8 @@ class Template:
         self.ihandle = open(self.path, "r")
         self.ohandle = open(self.output, "w") if self.output else sys.stdout
 
-        # print("path: %s, output: %s, seed: %d" % (self.path, self.output, self.seed))
+        self._debug("Template (path: %s, output: %s, seed: %d)" %
+                    (self.path, self.output, self.seed))
         try:
             self._parse(json.load(self.ihandle))
         finally:

@@ -19,7 +19,8 @@ class TemplateGenerator:
             output = self.args.output
         if not path:
             path = self.args.template
-        template = Template(path=path, output=output, seed=self.args.seed)
+        template = Template(path=path, output=output,
+                            seed=self.args.seed, quiet=self.args.quiet)
         template.generate()
 
     def _walk(self):
@@ -67,6 +68,8 @@ def main(argv=False):
     parser.add_argument('-s', '--seed', type=int,
                         help='random generator seed value')
     parser.add_argument('-o', '--output', action=DirOrFileAction,
+                        help='random generator seed value')
+    parser.add_argument('-q', '--quiet', action='store_true',
                         help='random generator seed value')
 
     try:
