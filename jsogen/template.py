@@ -22,17 +22,22 @@ class Template:
 
     def _parse_array(self, dl):
         self._print('[')
-        for val in dl:
-            self._parse(val)
-            self._print(',')
+        if len(dl):
+            self._parse(dl[0])
+            for val in dl[1:]:
+                self._print(',')
+                self._parse(val)
         self._print(']')
 
     def _parse_object(self, dd):
         self._print('{')
+        dd_len = len(dd) - 1;
         for key, val in dd.items():
             self._print('"%s":' % key)
             self._parse(val)
-            self._print(',')
+            if dd_len > 0:
+                self._print(',')
+                dd_len -= 1
         self._print('}')
 
     def _parse_string(self, ds):
