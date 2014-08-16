@@ -8,14 +8,21 @@ class Template:
     """Template for generating JSON"""
 
     def __init__(self, path, output, seed=None, quiet=False):
-        self.seed = seed or random.randint(1, 1000)
         self.path = path
         self.output = output
         self.quiet = quiet
+        self.seed = seed or random.randint(1, 1000)
+        random.seed(seed)
 
     def _debug(self, message):
         if not self.quiet:
             print(message)
+
+    def _make_command(self, ds):
+        s = ds.strip()
+        if not s.startswith('{{') or not s.endswith('}}'):
+            return None
+        return TemplateCommand(s[2:-2])
 
     def _print(self, content):
         self.ohandle.write(str(content))
@@ -41,7 +48,11 @@ class Template:
         self._print('}')
 
     def _parse_string(self, ds):
-        self._print('"%s"' % ds)
+        cmd = self._make_command(ds)
+        if cmd:
+            cmd.run(self.ohandle)
+        else:
+            self._print('"%s"' % str)
 
     def _parse(self, data):
         if isinstance(data, list):
@@ -68,3 +79,12 @@ class Template:
             else:
                 self.ohandle.close()
 
+
+class TemplateCommand:
+    """Template command executer"""
+
+    def __init__(self, cmd):
+        self.cmd = cmd
+
+    def run(self, output):
+        output.write(self.cmd)
