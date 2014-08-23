@@ -1,6 +1,8 @@
 import json
 import random
 import sys
+import re
+from expression import Expression
 from pip._vendor.pkg_resources import basestring
 
 
@@ -17,12 +19,6 @@ class Template:
     def _debug(self, message):
         if not self.quiet:
             print(message)
-
-    def _make_command(self, ds):
-        s = ds.strip()
-        if not s.startswith('{{') or not s.endswith('}}'):
-            return None
-        return TemplateCommand(s[2:-2])
 
     def _print(self, content):
         self.ohandle.write(str(content))
@@ -48,11 +44,7 @@ class Template:
         self._print('}')
 
     def _parse_string(self, ds):
-        cmd = self._make_command(ds)
-        if cmd:
-            cmd.run(self.ohandle)
-        else:
-            self._print('"%s"' % str)
+        TemplateString(self.ohandle).run(ds)
 
     def _parse(self, data):
         if isinstance(data, list):
@@ -80,11 +72,16 @@ class Template:
                 self.ohandle.close()
 
 
-class TemplateCommand:
-    """Template command executer"""
+class TemplateString:
+    """Template string converter"""
 
-    def __init__(self, cmd):
-        self.cmd = cmd
+    pattern = re.compile(r"{{\s*(.*?)\s*}}")
 
-    def run(self, output):
-        output.write(self.cmd)
+    def __init__(self, output):
+        self.output = output
+
+    def _match(self, match):
+        Expression(match.group(1), output=self.output).run()
+
+    def run(self, data):
+        self.__class__.pattern.sub(self._match, data)
