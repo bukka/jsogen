@@ -40,6 +40,13 @@ class Scanner:
         in_string = False
         token = Token.t_empty
         while p < es.len:
-            if not in_string and es[p] in string.whitespace:
+            if in_string:
+                if es[p] == "'":
+                    self.value = es[self.start + 1:p - 1]
+                    return Token.t_string
+            elif es[p] in string.whitespace:
+                self.start = p
                 return token
-
+            elif es[p] == "'":
+                in_string = True
+            p += 1
