@@ -26,10 +26,22 @@ class Template:
     def _parse_array(self, dl):
         self._print('[')
         if len(dl):
-            self._parse(dl[0])
-            for val in dl[1:]:
-                self._print(',')
-                self._parse(val)
+            val = self._parse(dl[0])
+            if (isinstance(val, TemplateString) and
+                 val.expression and val.expression.function and val.expression.function.repeat):
+                repeat = val.expression.function.repeat
+            else:
+                repeat = 0
+
+            is_first = repeat > 0
+            while repeat > 0:
+                for val in dl[1:]:
+                    if is_first:
+                        is_first = False
+                    else:
+                        self._print(',')
+                    self._parse(val)
+                repeat -= 1
         self._print(']')
 
     def _parse_object(self, dd):
@@ -44,7 +56,9 @@ class Template:
         self._print('}')
 
     def _parse_string(self, ds):
-        TemplateString(self.ohandle).run(ds)
+        ts = TemplateString(self.ohandle)
+        ts.run(ds)
+        return ts
 
     def _parse(self, data):
         if isinstance(data, list):
@@ -52,9 +66,10 @@ class Template:
         elif isinstance(data, dict):
             self._parse_object(data)
         elif isinstance(data, basestring):
-            self._parse_string(data)
+            return self._parse_string(data)
         else:
             self._print(data)
+        return True
 
     def generate(self):
         self.ihandle = open(self.path, "r")
@@ -79,9 +94,11 @@ class TemplateString:
 
     def __init__(self, output):
         self.output = output
+        self.expression = False
 
     def _match(self, match):
-        Expression(match.group(1), output=self.output).run()
+        self.expression = Expression(match.group(1), output=self.output)
+        self.expression.run()
 
     def run(self, data):
         self.__class__.pattern.sub(self._match, data)
