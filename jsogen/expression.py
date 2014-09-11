@@ -99,7 +99,7 @@ class Scanner:
 
     def result(self, token, p, is_string=False, char_term=False):
         val_start = self.start + 1 if is_string else self.start
-        val_end = p - 1 if is_string else p
+        val_end = p
         self.value = self.es[val_start:val_end]
         self.start = p if char_term else p + 1
         return token
@@ -137,7 +137,7 @@ class Scanner:
                 self.start = p
                 return token
             elif c == "'":
-                if not token:
+                if token:
                     raise ScannerException("single quote beginning of string")
                 token = Token.t_string
             elif c in string.digits:
