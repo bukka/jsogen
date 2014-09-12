@@ -49,18 +49,46 @@ class Function:
         else:
             self.f_integer(len1, len2)
 
+    def _char_range(self, start, end):
+        return [ chr(x) for x in range(start, end) ]
+
     def f_string(self, len1, len2=None, kind='basic'):
         if not len2:
             len2 = len1
             len1 = 0
+        seq = False
         if kind == 'basic':
             # just simplified set of english letters
             seq = string.ascii_letters + string.digits + '    _()'
-        if kind == 'printable':
-            seq = string.printable
-        if kind == 'ascii':
+        elif kind == 'ascii':
             seq = string.ascii_letters
-        if kind == 'digit':
+        elif kind == 'digit':
             seq = string.digits
+        elif kind == 'printable':
+            seq = string.printable
+        elif kind.startswith('utf8'):
+            utf8_1 = [0x000020, 0x00007f]
+            utf8_2 = [0x000080, 0x0007ff]
+            utf8_3 = [0x001000, 0x00ffff]
+            utf8_4 = [0x010000, 0x10ffff]
+            if kind == 'utf8':
+                seq_1 = self._char_range(*utf8_1)
+                seq_2 = self._char_range(*utf8_2)
+                seq_3 = self._char_range(*utf8_3)
+                seq_4 = self._char_range(*utf8_4)
+                seq = seq_1 + seq_2 + seq_3 + seq_4
+            if kind == 'utf8_1':
+                seq = self._char_range(*utf8_1)
+            elif kind == 'utf8_2':
+                seq = self._char_range(*utf8_2)
+            elif kind == 'utf8_3':
+                seq = self._char_range(*utf8_3)
+            elif kind == 'utf8_4':
+                seq = self._char_range(*utf8_4)
+        if not seq:
+            raise FunctionException("Invalid string kind")
         slen = random.randint(int(len1), int(len2))
         self._write('"' + ''.join([random.choice(seq) for _ in range(slen)]) + '"')
+
+class FunctionException(Exception):
+    pass
