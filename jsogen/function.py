@@ -1,5 +1,6 @@
 import random
 import string
+import sys
 
 class Function:
     """Template Function"""
@@ -7,6 +8,10 @@ class Function:
         self.name = name
         self.args = args
         self.repeat = False
+        if sys.version < '3':
+            self.chr = unichr
+        else:
+            self.chr = chr
 
     def dump(self, os):
         os.write("%s[%s]" % (self.name, ', '.join(self.args)))
@@ -52,10 +57,19 @@ class Function:
     def _char_range(self, start, end):
         return [ chr(x) for x in range(start, end) ]
 
+    def _choice_utf(self, code_range):
+        code = random.randint(code_range[0], code_range[1])
+        if code > 0xd7ff:
+            code += 0x800
+        return self.chr(code)
+
     def f_string(self, len1, len2=None, kind='basic'):
         if not len2:
             len2 = len1
             len1 = 0
+        # default choic function for selecting random item from seq
+        choice = lambda x: random.choice(x)
+        # sequence string or range tuple for utf
         seq = False
         if kind == 'basic':
             # just simplified set of english letters
@@ -67,28 +81,31 @@ class Function:
         elif kind == 'printable':
             seq = string.printable
         elif kind.startswith('utf8'):
-            utf8_1 = [0x000020, 0x00007f]
-            utf8_2 = [0x000080, 0x0007ff]
-            utf8_3 = [0x001000, 0x00ffff]
-            utf8_4 = [0x010000, 0x10ffff]
-            if kind == 'utf8':
-                seq_1 = self._char_range(*utf8_1)
-                seq_2 = self._char_range(*utf8_2)
-                seq_3 = self._char_range(*utf8_3)
-                seq_4 = self._char_range(*utf8_4)
-                seq = seq_1 + seq_2 + seq_3 + seq_4
-            if kind == 'utf8_1':
-                seq = self._char_range(*utf8_1)
+            choice = self._choice_utf
+            if kind == 'utf8' or kind == 'utf8_14':
+                seq = (0x000020, 0x10f7ff)
+            elif kind == 'utf8_1':
+                seq = (0x000020, 0x00007f)
             elif kind == 'utf8_2':
-                seq = self._char_range(*utf8_2)
+                seq = (0x000080, 0x0007ff)
             elif kind == 'utf8_3':
-                seq = self._char_range(*utf8_3)
+                seq = (0x001000, 0x00f7ff)
             elif kind == 'utf8_4':
-                seq = self._char_range(*utf8_4)
+                seq = (0x00f800, 0x10f7ff)
+            elif kind == 'utf8_12':
+                seq = (0x000020, 0x0007ff)
+            elif kind == 'utf8_13':
+                seq = (0x000020, 0x00f7ff)
+            elif kind == 'utf8_23':
+                seq = (0x000080, 0x00f7ff)
+            elif kind == 'utf8_24':
+                seq = (0x000080, 0x10f7ff)
         if not seq:
             raise FunctionException("Invalid string kind")
+        # string length
         slen = random.randint(int(len1), int(len2))
-        self._write('"' + ''.join([random.choice(seq) for _ in range(slen)]) + '"')
+        # write string
+        self._write('"' + ''.join([choice(seq) for _ in range(slen)]) + '"')
 
 class FunctionException(Exception):
     pass
