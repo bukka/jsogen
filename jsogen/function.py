@@ -8,10 +8,6 @@ class Function:
         self.name = name
         self.args = args
         self.repeat = False
-        if sys.version < '3':
-            self.chr = unichr
-        else:
-            self.chr = chr
 
     def dump(self, os):
         os.write("%s[%s]" % (self.name, ', '.join(self.args)))
@@ -29,7 +25,7 @@ class Function:
         elif self.name == 'number':
             self.f_number(*self.args)
         elif self.name == 'string':
-            self.f_string(*self.args)
+            FunctionString(os).run(*self.args)
         else:
             self.dump(os)
 
@@ -54,8 +50,15 @@ class Function:
         else:
             self.f_integer(len1, len2)
 
-    def _char_range(self, start, end):
-        return [ chr(x) for x in range(start, end) ]
+
+class FunctionString:
+
+    def __init__(self, os):
+        self.os = os
+        if sys.version < '3':
+            self.chr = unichr
+        else:
+            self.chr = chr
 
     def _choice_utf(self, code_range):
         code = random.randint(code_range[0], code_range[1])
@@ -63,10 +66,10 @@ class Function:
             code += 0x800
         return self.chr(code)
 
-    def f_string(self, len1, len2=None, kind='basic'):
-        if not len2:
-            len2 = len1
-            len1 = 0
+    def _choice_mix(self, choice1, seq1, choice2, seq2, ratio):
+        return choice2(seq2) if random.random() > ratio else choice1(seq1)
+
+    def _kind(self, kind):
         # default choic function for selecting random item from seq
         choice = lambda x: random.choice(x)
         # sequence string or range tuple for utf
@@ -102,10 +105,27 @@ class Function:
                 seq = (0x000080, 0x10f7ff)
         if not seq:
             raise FunctionException("Invalid string kind")
+        # return tuple with choice function and seq / range tuple
+        return (choice, seq)
+
+    def run(self, len1, len2=None, kind='basic', kind2=None, ratio=0.5):
+        if not len2:
+            len2 = len1
+            len1 = 0
+
+        (choice, seq) = self._kind(kind)
+        if kind2:
+            (choice2, seq2) = self._kind(kind2)
+            arg = (choice, seq, choice2, seq2, ratio)
+            choice = self._choice_mix
+        else:
+            arg = (seq,)
+
         # string length
         slen = random.randint(int(len1), int(len2))
         # write string
-        self._write('"' + ''.join([choice(seq) for _ in range(slen)]) + '"')
+        self.os.write('"' + ''.join([choice(*arg) for _ in range(slen)]) + '"')
+
 
 class FunctionException(Exception):
     pass
