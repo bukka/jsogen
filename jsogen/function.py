@@ -69,6 +69,27 @@ class FunctionString:
     def _choice_mix(self, choice1, seq1, choice2, seq2, ratio):
         return choice2(seq2) if random.random() > ratio else choice1(seq1)
 
+    def _kind_utf(self, kind):
+        if kind == 'utf8' or kind == 'utf8_14':
+            return (0x000020, 0x10f7ff)
+        if kind == 'utf8_1':
+            return (0x000020, 0x00007f)
+        if kind == 'utf8_2':
+            return (0x000080, 0x0007ff)
+        if kind == 'utf8_3':
+            return (0x001000, 0x00f7ff)
+        if kind == 'utf8_4':
+            return (0x00f800, 0x10f7ff)
+        if kind == 'utf8_12':
+            return (0x000020, 0x0007ff)
+        if kind == 'utf8_13':
+            return (0x000020, 0x00f7ff)
+        if kind == 'utf8_23':
+            return (0x000080, 0x00f7ff)
+        if kind == 'utf8_24':
+            return (0x000080, 0x10f7ff)
+        return None
+
     def _kind(self, kind):
         # default choic function for selecting random item from seq
         choice = lambda x: random.choice(x)
@@ -85,30 +106,13 @@ class FunctionString:
             seq = string.printable
         elif kind.startswith('utf8'):
             choice = self._choice_utf
-            if kind == 'utf8' or kind == 'utf8_14':
-                seq = (0x000020, 0x10f7ff)
-            elif kind == 'utf8_1':
-                seq = (0x000020, 0x00007f)
-            elif kind == 'utf8_2':
-                seq = (0x000080, 0x0007ff)
-            elif kind == 'utf8_3':
-                seq = (0x001000, 0x00f7ff)
-            elif kind == 'utf8_4':
-                seq = (0x00f800, 0x10f7ff)
-            elif kind == 'utf8_12':
-                seq = (0x000020, 0x0007ff)
-            elif kind == 'utf8_13':
-                seq = (0x000020, 0x00f7ff)
-            elif kind == 'utf8_23':
-                seq = (0x000080, 0x00f7ff)
-            elif kind == 'utf8_24':
-                seq = (0x000080, 0x10f7ff)
+            seq = self._kind_utf(kind)
         if not seq:
             raise FunctionException("Invalid string kind")
         # return tuple with choice function and seq / range tuple
         return (choice, seq)
 
-    def run(self, len1, len2=None, kind='basic', kind2=None, ratio=0.5):
+    def run(self, len1, len2=None, kind='basic', kind2=None, ratio=None):
         if not len2:
             len2 = len1
             len1 = 0
