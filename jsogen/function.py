@@ -104,6 +104,8 @@ class FunctionString:
             seq = string.digits
         elif kind == 'printable':
             seq = string.printable
+        elif kind == 'escape':
+            seq = ['\\n', '\\t', '\\r', '\\f', '\\b', '\\\\', '\\/']
         elif kind.startswith('utf8'):
             choice = self._choice_utf
             seq = self._kind_utf(kind)
@@ -116,6 +118,11 @@ class FunctionString:
         if not len2:
             len2 = len1
             len1 = 0
+
+        # default values for escape mode (prevents all escapes by default)
+        if kind == 'escape':
+            kind2 = kind2 or 'basic'
+            ratio = ratio or 0.1
 
         (choice, seq) = self._kind(kind)
         if kind2:

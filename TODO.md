@@ -9,9 +9,8 @@
 
 ### string
 - escape
-  - control characters
   - unicode escapes
-  - some mixed variants
+  - set correct length (std escape = 2 characters...)
 
 ### repeat
 - object support
