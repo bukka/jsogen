@@ -50,9 +50,15 @@ class Parser:
     def _assert_arg(self, token=False):
         if not token:
             token = self.scanner.scan()
-        if token not in [Token.t_int, Token.t_float, Token.t_string]:
+        value = self.scanner.value
+        if token == Token.t_string:
+            return value
+        if token == Token.t_int:
+            return int(value)
+        elif token == Token.t_float:
+            return float(value)
+        else:
             raise ParserException("Invalid argument token")
-        return self.scanner.value
 
     def parse(self):
         fce = self._function()
