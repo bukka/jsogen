@@ -134,8 +134,14 @@ class FunctionString:
 
         # string length
         slen = random.randint(int(len1), int(len2))
+        # generate string array
+        sarr = []
+        while slen > 0:
+            c = choice(*arg)
+            slen -= len(c)
+            sarr.append(c)
         # write string
-        self.os.write('"' + ''.join([choice(*arg) for _ in range(slen)]) + '"')
+        self.os.write('"' + ''.join(sarr) + '"')
 
 
 class FunctionException(Exception):

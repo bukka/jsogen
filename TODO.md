@@ -10,7 +10,7 @@
 ### string
 - escape
   - unicode escapes
-  - set correct length (std escape = 2 characters...)
+  - unicode surrogates escapes
 
 ### repeat
 - object support
