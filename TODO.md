@@ -20,4 +20,5 @@
 
 
 ## Parser
+- array parameter type
 - named params 
