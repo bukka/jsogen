@@ -62,8 +62,12 @@ class FunctionString:
 
     def _choice_utf(self, code_range):
         code = random.randint(code_range[0], code_range[1])
+        # shift for surrogate character codes
         if code > 0xd7ff:
             code += 0x800
+        # do not return back slash or double quote
+        if code == ord('\\') or code == ord('"'):
+            return ''
         return self.chr(code)
 
     def _choice_mix(self, choice1, seq1, choice2, seq2, ratio):
@@ -96,14 +100,18 @@ class FunctionString:
         # sequence string or range tuple for utf
         seq = False
         if kind == 'basic':
-            # just simplified set of english letters
-            seq = string.ascii_letters + string.digits + '    _()'
-        elif kind == 'ascii':
+            # spaces have higher probabality of selection
+            spaces = ' ' * 10
+            # just simplified set of english letters + spaces
+            seq = string.ascii_letters + string.digits + spaces
+        elif kind == 'ascii_letters':
             seq = string.ascii_letters
         elif kind == 'digit':
             seq = string.digits
         elif kind == 'printable':
-            seq = string.printable
+            # punctuation that does not contain back slash and double quote
+            punctuation = "!#$%&'()*+,-./:;<=>?@[]^_`{|}~"
+            seq = string.ascii_letters + string.digits + string.whitespace + punctuation
         elif kind == 'escape':
             seq = ['\\n', '\\t', '\\r', '\\f', '\\b', '\\\\', '\\/']
         elif kind.startswith('utf8'):
