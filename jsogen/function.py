@@ -123,9 +123,11 @@ class FunctionString:
         return (choice, seq)
 
     def run(self, len1, len2=None, kind='basic', kind2=None, ratio=None):
+        # string length
         if not len2:
-            len2 = len1
-            len1 = 0
+            slen = len2 = len1
+        else:
+            slen = random.randint(int(len1), int(len2))
 
         # default values for escape mode (prevents all escapes by default)
         if kind == 'escape':
@@ -140,8 +142,6 @@ class FunctionString:
         else:
             arg = (seq,)
 
-        # string length
-        slen = random.randint(int(len1), int(len2))
         # generate string array
         sarr = []
         while slen > 0:
