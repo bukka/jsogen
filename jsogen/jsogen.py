@@ -39,7 +39,7 @@ class TemplateGenerator:
             self._walk()
 
 
-class DirOrFileAction(argparse.Action):
+class TemplateAction(argparse.Action):
     """ArgumentParser action for template parameter"""
 
     def __call__(self, parser, namespace, values, option_string=None):
@@ -57,17 +57,39 @@ class DirOrFileAction(argparse.Action):
         if not os.access(path, os.R_OK):
             raise argparse.ArgumentTypeError("Template %s path '%s' is not readable" % (what, path))
 
+class OutputAction(argparse.Action):
+    """ArgumentParser action for template parameter"""
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        path = values
+        if os.path.isfile(path):
+            self.checkWriteAcces(path, 'file')
+            setattr(namespace, self.dest, values)
+        elif os.path.isdir(path):
+            self.checkWriteAcces(path, 'directory')
+            setattr(namespace, self.dest + '_dir', values)
+        else:
+            dirname = os.path.dirname(path)
+            if not os.path.isdir(dirname):
+                raise argparse.ArgumentTypeError("Output path '%s' is neither file nor directory" % path)
+            self.checkWriteAcces(dirname, 'parent directory')
+            setattr(namespace, self.dest, path)
+
+    def checkWriteAcces(self, path, what):
+        if not os.access(path, os.W_OK):
+            raise argparse.ArgumentTypeError("Output %s path '%s' is not writable" % (what, path))
+
 
 def main(argv=False):
     argv = (argv or sys.argv)[1:]
 
     parser = argparse.ArgumentParser(description='JavaScript Object Generator')
 
-    parser.add_argument('template', action=DirOrFileAction,
+    parser.add_argument('template', action=TemplateAction,
                         help='template file or directory')
     parser.add_argument('-s', '--seed', type=int,
                         help='random generator seed value')
-    parser.add_argument('-o', '--output', action=DirOrFileAction,
+    parser.add_argument('-o', '--output', action=OutputAction,
                         help='random generator seed value')
     parser.add_argument('-q', '--quiet', action='store_true',
                         help='random generator seed value')
