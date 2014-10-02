@@ -57,23 +57,40 @@ class FunctionString:
         self.os = os
         if sys.version < '3':
             self.chr = unichr
+            self.uesc = lambda x : unichr(x).encode('unicode_escape')
         else:
             self.chr = chr
+            self.uesc = lambda x : chr(x).encode('unicode_escape').decode('utf8')
 
-    def _choice_utf(self, code_range):
+    def _choice_mix(self, choice1, seq1, choice2, seq2, ratio):
+        return choice2(seq2) if random.random() > ratio else choice1(seq1)
+
+    def _choose_utf_code(self, code_range):
         code = random.randint(code_range[0], code_range[1])
         # shift for surrogate character codes
         if code > 0xd7ff:
             code += 0x800
+        return code
+
+    def _choice_utf(self, code_range):
+        code = self._choose_utf_code(code_range)
         # do not return back slash or double quote
         if code == ord('\\') or code == ord('"'):
             return ''
         return self.chr(code)
 
-    def _choice_mix(self, choice1, seq1, choice2, seq2, ratio):
-        return choice2(seq2) if random.random() > ratio else choice1(seq1)
+
+
+    def _choice_utf_esc(self, code_range):
+        code = self._choose_utf_code(code_range)
+        if code > 0x010000:
+            pass
+        else:
+            return self.uesc(code)
+
 
     def _kind_utf(self, kind):
+        kind = kind.replace('escape_utf', 'utf8')
         if kind == 'utf8' or kind == 'utf8_14':
             return (0x000020, 0x10f7ff)
         if kind == 'utf8_1':
@@ -114,6 +131,9 @@ class FunctionString:
             seq = string.ascii_letters + string.digits + string.whitespace + punctuation
         elif kind == 'escape':
             seq = ['\\n', '\\t', '\\r', '\\f', '\\b', '\\\\', '\\/']
+        elif kind.startswith('escape_utf'):
+            choice = self._choice_esc_utf
+            seq = self._kind_utf(kind)
         elif kind.startswith('utf8'):
             choice = self._choice_utf
             seq = self._kind_utf(kind)
@@ -130,7 +150,7 @@ class FunctionString:
             slen = random.randint(int(len1), int(len2))
 
         # default values for escape mode (prevents all escapes by default)
-        if kind == 'escape':
+        if kind.startswith('escape'):
             kind2 = kind2 or 'basic'
             ratio = ratio or 0.1
 
