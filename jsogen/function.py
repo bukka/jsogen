@@ -51,15 +51,18 @@ class Function:
             self.f_integer(len1, len2)
 
 
+# compat with python 2
+if sys.version >= '3':
+    unichr = chr
+
+
 class FunctionString:
 
     def __init__(self, os):
         self.os = os
         if sys.version < '3':
-            self.chr = unichr
             self.uesc = lambda x : unichr(x).encode('unicode_escape')
         else:
-            self.chr = chr
             self.uesc = lambda x : chr(x).encode('unicode_escape').decode('utf8')
 
     def _choice_mix(self, choice1, seq1, choice2, seq2, ratio):
@@ -77,9 +80,7 @@ class FunctionString:
         # do not return back slash or double quote
         if code == ord('\\') or code == ord('"'):
             return ''
-        return self.chr(code)
-
-
+        return unichr(code)
 
     def _choice_utf_esc(self, code_range):
         code = self._choose_utf_code(code_range)
@@ -87,7 +88,6 @@ class FunctionString:
             pass
         else:
             return self.uesc(code)
-
 
     def _kind_utf(self, kind):
         kind = kind.replace('escape_utf', 'utf8')
