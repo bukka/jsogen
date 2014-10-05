@@ -60,10 +60,6 @@ class FunctionString:
 
     def __init__(self, os):
         self.os = os
-        if sys.version < '3':
-            self.uesc = lambda x : unichr(x).encode('unicode_escape')
-        else:
-            self.uesc = lambda x : chr(x).encode('unicode_escape').decode('utf8')
 
     def _choice_mix(self, choice1, seq1, choice2, seq2, ratio):
         return choice2(seq2) if random.random() > ratio else choice1(seq1)
@@ -85,9 +81,14 @@ class FunctionString:
     def _choice_utf_esc(self, code_range):
         code = self._choose_utf_code(code_range)
         if code > 0x010000:
-            pass
+            high = 0xD800 + (code >> 10)
+            low = 0xDC00 + (code & 0x3ff)
+            return self._utf_code_to_esc(high) + self._utf_code_to_esc(low)
         else:
-            return self.uesc(code)
+            return self._utf_code_to_esc(code)
+
+    def _utf_code_to_esc(self, code):
+        return "\\u{:04X}".format(code)
 
     def _kind_utf(self, kind):
         kind = kind.replace('escape_utf', 'utf8')
@@ -112,7 +113,7 @@ class FunctionString:
         return None
 
     def _kind(self, kind):
-        # default choic function for selecting random item from seq
+        # default choice function for selecting random item from seq
         choice = lambda x: random.choice(x)
         # sequence string or range tuple for utf
         seq = False
