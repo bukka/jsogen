@@ -142,7 +142,7 @@ class FunctionString:
         elif kind == 'escape':
             seq = ['\\n', '\\t', '\\r', '\\f', '\\b', '\\\\', '\\/']
         elif kind.startswith('escape_utf'):
-            choice = self._choice_esc_utf
+            choice = self._choice_utf_esc
             seq = self._kind_utf(kind)
         elif kind.startswith('utf8'):
             choice = self._choice_utf
@@ -162,7 +162,7 @@ class FunctionString:
         # default values for escape mode (prevents all escapes by default)
         if kind.startswith('escape'):
             kind2 = kind2 or 'basic'
-            ratio = ratio or 0.1
+            ratio = ratio or 0.5 if kind.startswith('escape_utf') else 0.1
 
         (choice, seq) = self._kind(kind)
         if kind2:
