@@ -33,15 +33,24 @@ class Function:
         self.os.write(str(msg))
 
     def f_repeat(self, count1, count2=None):
-        self.repeat = random.randint(int(count1), int(count2)) if count2 else int(count1)
+        if count2 is None:
+            self.repeat = int(count1)
+        else:
+            self.repeat = random.randint(int(count1), int(count2))
 
     def f_boolean(self):
         self._write(random.choice(["true", "false"]))
 
-    def f_integer(self, len1, len2):
+    def f_integer(self, len1, len2=None):
+        if len2 is None:
+            len2 = len1
+            len1 = 0
         self._write(random.randint(int(len1), int(len2)))
 
-    def f_float(self, len1, len2):
+    def f_float(self, len1, len2=None):
+        if len2 is None:
+            len2 = len1
+            len1 = 0.
         self._write(random.uniform(float(len1), float(len2)))
 
     def f_number(self, len1, len2, kind='integer'):
