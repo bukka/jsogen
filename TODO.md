@@ -9,8 +9,7 @@
 
 ### string
 - escape
-  - unicode escapes
-  - unicode surrogates escapes
+  - unicode surrogates escapes (testing)
 
 ### repeat
 - object support
@@ -21,4 +20,8 @@
 
 ## Parser
 - array parameter type
-- named params 
+
+
+## Input
+- Use ordered dictionary
+  - it will allow to recreate stable output

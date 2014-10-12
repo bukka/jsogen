@@ -4,9 +4,10 @@ import sys
 
 class Function:
     """Template Function"""
-    def __init__(self, name, args):
+    def __init__(self, name, args, nargs):
         self.name = name
         self.args = args
+        self.nargs = nargs
         self.repeat = False
 
     def dump(self, os):

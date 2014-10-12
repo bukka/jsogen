@@ -34,23 +34,48 @@ class Token:
     t_eq = 9
     t_end = 10
 
+
 class Parser:
-    """Parser"""
+    """Parser
+    
+    Grammar (BNF):
+    
+        <parse>     ::= <fce>
+        <fce>       ::= <IDENT> "(" <arg>
+        <arg>       ::= value <arg-cont> | narg | ")"
+        <arg-cont>  ::= "," <arg> | ")"
+        <narg>      ::= <IDENT> "=" value <narg_cont> | ")"
+        <narg-cont> ::= "," <narg> | ")"
+        <value>     ::= <STRING> | <INT> | <FLOAT>
+    
+    """
 
     def __init__(self, es):
         self.scanner = Scanner(es)
 
-    def _assert(self, expected_token, token=False):
-        if not token:
-            token = self.scanner.scan()
-        if expected_token != token:
-            raise ParserException("Expected %d token, provided %d" % (expected_token, token))
+    def _scan_value(self):
         return self.scanner.value
+
+    def _scan_token(self):
+        return self.scanner.token
+
+    def _scan_next(self):
+        return self.scanner.scan()
+
+
+    def _assert(self, expected_tokens, token=False):
+        if not isinstance(expected_tokens, list):
+            expected_tokens = [expected_tokens]
+        if not token:
+            token = self._scan_next()
+        if not token in expected_tokens:
+            raise ParserException("Expected %s token, provided %d" % (' or '.join(map(str, expected_tokens)), token))
+        return self._scan_value()
 
     def _assert_arg(self, token=False):
         if not token:
-            token = self.scanner.scan()
-        value = self.scanner.value
+            token = self._scan_next()
+        value = self._scan_value()
         if token == Token.t_string:
             return value
         if token == Token.t_int:
@@ -68,24 +93,48 @@ class Parser:
     def _function(self):
         name = self._assert(Token.t_ident)
         self._assert(Token.t_lpar)
-        args = self._args()
-        return Function(name, args)
-
-    def _args(self):
         args = []
-        token = self.scanner.scan()
-        if token == Token.t_rpar:
-            return args
-        args.append(self._assert_arg(token))
-        return self._args_cont(args)
+        nargs = {}
+        self._arg(args, nargs)
+        return Function(name, args, nargs)
 
-    def _args_cont(self, args):
-        token = self.scanner.scan()
+    def _arg(self, args, nargs):
+        token = self._scan_next()
+        if token in [ Token.t_string, Token.t_float, Token.t_int ]:
+            args.append(self._value(token))
+            self._arg_cont(args, nargs)
+        else:
+            self._narg(nargs)
+
+
+    def _arg_cont(self, args, nargs):
+        self._assert([Token.t_comma, Token.t_rpar])
+        self._arg(args, nargs)
+
+    def _narg(self, nargs):
+        token = self._scan_token()
         if token == Token.t_rpar:
-            return args
-        self._assert(Token.t_comma, token)
-        args.append(self._assert_arg())
-        return self._args_cont(args)
+            return
+        name = self._scan_value()
+        self._assert(Token.t_eq)
+        nargs[name] = self._value()
+        self._narg(nargs)
+
+    def _narg_cont(self, nargs):
+        self._assert([Token.t_comma, Token.t_rpar])
+        self._narg(nargs)
+
+
+    def _value(self, token=False):
+        if not token:
+            token = self._scan_next()
+        value = self._scan_value()
+        if token == Token.t_string:
+            return value
+        elif token == Token.t_int:
+            return int(value)
+        else:
+            return float(value)
 
 
 class ParserException(Exception):
@@ -108,12 +157,14 @@ class Scanner:
         val_end = p
         self.value = self.es[val_start:val_end]
         self.start = p if char_term else p + 1
+        self.token = token
         return token
 
     def result_char(self, token, char_token, p):
         if token == Token.t_empty:
             self.start = p + 1
             self.value = None
+            self.token = char_token
             return char_token
         else:
             return self.result(token, p, char_term=True)
@@ -162,7 +213,8 @@ class Scanner:
             p += 1
         if token == Token.t_string:
             raise ScannerException("unclosed string")
-        return Token.t_end
+        self.token = Token.t_end
+        return self.token
 
 
 class ScannerException(Exception):
