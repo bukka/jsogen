@@ -3,8 +3,10 @@ import random
 import sys
 import re
 from expression import Expression
-from pip._vendor.pkg_resources import basestring
 
+# compat with python 2
+if sys.version >= '3':
+    basestring = str
 
 class Template:
     """Template for generating JSON"""

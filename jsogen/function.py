@@ -86,7 +86,11 @@ class FunctionString:
         # do not return back slash or double quote
         if code == ord('\\') or code == ord('"'):
             return ''
-        return unichr(code)
+        if code >= 0x10000 and sys.version < '3':
+            s = "\\U%08x" % code
+            return s.decode('unicode-escape')
+        else:
+            return unichr(code)
 
     def _choice_utf_esc(self, code_range):
         code = self._choose_utf_code(code_range)
