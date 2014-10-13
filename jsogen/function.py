@@ -15,20 +15,13 @@ class Function:
 
     def run(self, os):
         self.os = os
-        if self.name == 'repeat':
-            self.f_repeat(*self.args)
-        elif self.name == 'boolean':
-            self.f_boolean(*self.args)
-        elif self.name == 'integer':
-            self.f_integer(*self.args)
-        elif self.name == 'float':
-            self.f_float(*self.args)
-        elif self.name == 'number':
-            self.f_number(*self.args)
-        elif self.name == 'string':
-            FunctionString(os).run(*self.args)
+        cb_name = "f_" + self.name
+        if hasattr(self, cb_name):
+            cb = getattr(self, "f_" + self.name)
+            cb(*self.args, **self.nargs)
         else:
             self.dump(os)
+
 
     def _write(self, msg):
         self.os.write(str(msg))
@@ -48,7 +41,7 @@ class Function:
             len1 = 0
         self._write(random.randint(int(len1), int(len2)))
 
-    def f_float(self, len1, len2=None):
+    def f_float(self, len1, len2=None, precision=10):
         if len2 is None:
             len2 = len1
             len1 = 0.
@@ -60,6 +53,8 @@ class Function:
         else:
             self.f_integer(len1, len2)
 
+    def f_string(self, *args, **nargs):
+        FunctionString(self.os).run(*args, **nargs)
 
 # compat with python 2
 if sys.version >= '3':

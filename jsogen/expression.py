@@ -106,7 +106,6 @@ class Parser:
         else:
             self._narg(nargs)
 
-
     def _arg_cont(self, args, nargs):
         self._assert([Token.t_comma, Token.t_rpar])
         self._arg(args, nargs)
@@ -118,7 +117,7 @@ class Parser:
         name = self._scan_value()
         self._assert(Token.t_eq)
         nargs[name] = self._value()
-        self._narg(nargs)
+        self._narg_cont(nargs)
 
     def _narg_cont(self, nargs):
         self._assert([Token.t_comma, Token.t_rpar])
