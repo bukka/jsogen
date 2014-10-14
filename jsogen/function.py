@@ -41,11 +41,14 @@ class Function:
             len1 = 0
         self._write(random.randint(int(len1), int(len2)))
 
-    def f_float(self, len1, len2=None, precision=10):
+    def f_float(self, len1, len2=None, precision=10, exponent=False):
         if len2 is None:
             len2 = len1
             len1 = 0.
-        self._write(random.uniform(float(len1), float(len2)))
+        value = random.uniform(float(len1), float(len2))
+        flag = 'e' if exponent else 'f'
+        format = "%." + str(precision) + flag
+        self._write(format % value)
 
     def f_number(self, len1, len2, kind='integer'):
         if type == 'float':
