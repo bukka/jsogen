@@ -47,8 +47,8 @@ class Function:
             len1 = 0.
         value = random.uniform(float(len1), float(len2))
         flag = 'e' if exponent else 'f'
-        format = "%." + str(precision) + flag
-        self._write(format % value)
+        fmt = "%." + str(precision) + flag
+        self._write(fmt % value)
 
     def f_number(self, len1, len2, kind='integer'):
         if type == 'float':
