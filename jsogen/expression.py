@@ -126,7 +126,6 @@ class Parser:
         self._scan_next()
         self._narg(nargs)
 
-
     def _value(self, token=False):
         if not token:
             token = self._scan_next()

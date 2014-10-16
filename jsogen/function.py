@@ -22,7 +22,6 @@ class Function:
         else:
             self.dump(os)
 
-
     def _write(self, msg):
         self.os.write(str(msg))
 
