@@ -8,7 +8,7 @@ class Function:
         self.name = name
         self.args = args
         self.nargs = nargs
-        self.repeat = False
+        self.repeat = None
 
     def dump(self, os):
         os.write("%s[%s]" % (self.name, ', '.join(self.args)))

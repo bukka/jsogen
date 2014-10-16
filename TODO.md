@@ -6,9 +6,6 @@
 - escape
   - unicode surrogates escapes (testing)
 
-### repeat
-- object support
-
 ### recurse
 - deep objects
 
