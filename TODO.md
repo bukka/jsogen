@@ -2,11 +2,6 @@
 
 ## Functions
 
-### float
-- format
-  - format: f (default), e, E, g, G
-  - precision
-
 ### string
 - escape
   - unicode surrogates escapes (testing)
