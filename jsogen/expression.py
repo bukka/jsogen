@@ -32,7 +32,9 @@ class Token:
     t_lpar = 7
     t_rpar = 8
     t_eq = 9
-    t_end = 10
+    t_bool = 11
+    t_none = 12
+    t_end = 13
 
 
 class Parser:
@@ -76,7 +78,7 @@ class Parser:
         if not token:
             token = self._scan_next()
         value = self._scan_value()
-        if token == Token.t_string:
+        if token in (Token.t_string, Token.t_bool, Token.t_none):
             return value
         if token == Token.t_int:
             return int(value)
@@ -121,6 +123,7 @@ class Parser:
 
     def _narg_cont(self, nargs):
         self._assert([Token.t_comma, Token.t_rpar])
+        self._scan_next()
         self._narg(nargs)
 
 
@@ -128,7 +131,7 @@ class Parser:
         if not token:
             token = self._scan_next()
         value = self._scan_value()
-        if token == Token.t_string:
+        if token in (Token.t_string, Token.t_bool, Token.t_none):
             return value
         elif token == Token.t_int:
             return int(value)
@@ -156,6 +159,18 @@ class Scanner:
         val_end = p
         self.value = self.es[val_start:val_end]
         self.start = p if char_term else p + 1
+        if token == Token.t_ident:
+            # ident is case insensitive
+            self.value = self.value.lower()
+            if self.value == 'true':
+                token = Token.t_bool
+                self.value = True
+            elif self.value == 'false':
+                token = Token.t_bool
+                self.value = False
+            elif self.value == 'none':
+                token = Token.t_none
+                self.value = None
         self.token = token
         return token
 
@@ -190,8 +205,7 @@ class Scanner:
             elif c == '=':
                 return self.result_char(token, Token.t_eq, p);
             elif c in string.whitespace:
-                self.start = p
-                return token
+                return self.result(token, p)
             elif c == "'":
                 if token:
                     raise ScannerException("single quote beginning of string")
