@@ -32,9 +32,11 @@ class Token:
     t_lpar = 7
     t_rpar = 8
     t_eq = 9
-    t_bool = 11
-    t_none = 12
-    t_end = 13
+    t_minus = 10
+    t_plus = 11
+    t_bool = 12
+    t_none = 13
+    t_end = 14
 
 
 class Parser:
@@ -203,6 +205,10 @@ class Scanner:
                 return self.result_char(token, Token.t_rpar, p);
             elif c == '=':
                 return self.result_char(token, Token.t_eq, p);
+            elif c == '-':
+                return self.result_char(token, Token.t_minus, p);
+            elif c == '+':
+                return self.result_char(token, Token.t_plus, p);
             elif c in string.whitespace:
                 return self.result(token, p)
             elif c == "'":
