@@ -50,7 +50,9 @@ class Parser:
         <arg-cont>  ::= "," <arg> | ")"
         <narg>      ::= <IDENT> "=" value <narg_cont> | ")"
         <narg-cont> ::= "," <narg> | ")"
-        <value>     ::= <STRING> | <INT> | <FLOAT>
+        <value>     ::= <STRING> | <BOOL> | <NONE> | <number>
+        <number>    ::= "-" <unumber> | "+" <unumber> | <unumber>
+        <unumber>   ::= <INT> | <FLOAT>
     
     """
 
@@ -66,7 +68,6 @@ class Parser:
     def _scan_next(self):
         return self.scanner.scan()
 
-
     def _assert(self, expected_tokens, token=False):
         if not isinstance(expected_tokens, list):
             expected_tokens = [expected_tokens]
@@ -75,19 +76,6 @@ class Parser:
         if not token in expected_tokens:
             raise ParserException("Expected %s token, provided %d" % (' or '.join(map(str, expected_tokens)), token))
         return self._scan_value()
-
-    def _assert_arg(self, token=False):
-        if not token:
-            token = self._scan_next()
-        value = self._scan_value()
-        if token in (Token.t_string, Token.t_bool, Token.t_none):
-            return value
-        if token == Token.t_int:
-            return int(value)
-        elif token == Token.t_float:
-            return float(value)
-        else:
-            raise ParserException("Invalid argument token")
 
     def parse(self):
         fce = self._function()
@@ -104,11 +92,11 @@ class Parser:
 
     def _arg(self, args, nargs):
         token = self._scan_next()
-        if token in [ Token.t_string, Token.t_float, Token.t_int ]:
+        if token in (Token.t_ident, Token.t_end):
+            self._narg(nargs)
+        else:
             args.append(self._value(token))
             self._arg_cont(args, nargs)
-        else:
-            self._narg(nargs)
 
     def _arg_cont(self, args, nargs):
         self._assert([Token.t_comma, Token.t_rpar])
@@ -134,10 +122,27 @@ class Parser:
         value = self._scan_value()
         if token in (Token.t_string, Token.t_bool, Token.t_none):
             return value
-        elif token == Token.t_int:
-            return int(value)
         else:
+            return self._number(token, value)
+
+    def _number(self, token, value):
+        if token in (Token.t_minus, Token.t_plus):
+            minus = token == Token.t_minus
+            self._scan_next()
+            token = self._scan_token()
+            value = self._scan_value()
+        else:
+            minus = False
+        unumber = self._unumber(token, value)
+        return -1 * unumber if minus else unumber
+
+    def _unumber(self, token, value):
+        if token == Token.t_int:
+            return int(value)
+        if token == Token.t_float:
             return float(value)
+        # invalid argument
+        raise ParserException("Invalid argument token %d" % token)
 
 
 class ParserException(Exception):

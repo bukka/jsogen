@@ -1,1 +1,1 @@
-"{{float(1000, precision=5, flag='E')}}"
+"{{float(-1000, 1000, precision=5, flag='E')}}"
