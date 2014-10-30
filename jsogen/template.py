@@ -55,6 +55,8 @@ class Template:
                         self._print(',')
                     self._parse(val)
                 repeat -= 1
+                if repeat > 0:
+                    self._print(',')
         self._print(']')
 
     def _parse_object_pass1(self, dd):
