@@ -1,0 +1,5 @@
+{
+	"name": "John",
+	"{{string(3, kind='ascii_letters')}}": "David",
+	"{{repeat(5)}}": "2"
+}
