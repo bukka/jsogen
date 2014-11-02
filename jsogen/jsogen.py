@@ -90,9 +90,9 @@ def main(argv=False):
     parser.add_argument('-s', '--seed', type=int,
                         help='random generator seed value')
     parser.add_argument('-o', '--output', action=OutputAction,
-                        help='random generator seed value')
+                        help='output file or directory')
     parser.add_argument('-q', '--quiet', action='store_true',
-                        help='random generator seed value')
+                        help='do not print any debug info')
 
     try:
         args = parser.parse_args(argv)
