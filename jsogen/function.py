@@ -50,6 +50,28 @@ class Function:
         fmt = "%." + str(precision) + flag
         self._write(fmt % value)
 
+    def _convert_decimal_mask(self, num, mask):
+        result = []
+        mask_len = 0 if mask is None else len(mask)
+        mask_last_index = mask_len - 1
+        if num is None:
+            num = mask_len or 1
+        for i in range(0, num):
+            if i > mask_last_index:
+                c = str(random.randint(0, 9))
+            else:
+                c = mask[i]
+            result.append(c)
+        return ''.join(result)
+
+    def f_decimal(self, scale=None, precision=None, scale_mask=None, precision_mask=None):
+        scale_str = self._convert_decimal_mask(precision, precision_mask)
+        precision_str = self._convert_decimal_mask(precision, precision_mask)
+        self._write(scale_str)
+        if len(precision_str) > 0:
+            self._write('.')
+            self._write(precision_str)
+
     def f_number(self, len1, len2, kind='integer'):
         if type == 'float':
             self.f_float(len1, len2)
