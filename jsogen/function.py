@@ -65,7 +65,7 @@ class Function:
         return ''.join(result)
 
     def f_decimal(self, scale=None, precision=None, scale_mask=None, precision_mask=None):
-        scale_str = self._convert_decimal_mask(precision, precision_mask)
+        scale_str = self._convert_decimal_mask(scale, scale_mask)
         precision_str = self._convert_decimal_mask(precision, precision_mask)
         self._write(scale_str)
         if len(precision_str) > 0:
