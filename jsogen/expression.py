@@ -92,7 +92,7 @@ class Parser:
 
     def _arg(self, args, nargs):
         token = self._scan_next()
-        if token in (Token.t_ident, Token.t_end):
+        if token in (Token.t_ident, Token.t_end, Token.t_rpar):
             self._narg(nargs)
         else:
             args.append(self._value(token))
