@@ -153,6 +153,8 @@ class ParserException(Exception):
 class Scanner:
     """Expression Scanner"""
 
+    ident_letters = string.ascii_letters + '_'
+
     def __init__(self, es):
         self.es = es
         self.start = 0
@@ -227,11 +229,12 @@ class Scanner:
                 if token == Token.t_float:
                     raise ScannerException("double floating point")
                 token = Token.t_float
-            elif c in string.ascii_letters:
+            elif c in Scanner.ident_letters:
                 if token not in (Token.t_empty, Token.t_ident):
                     raise ScannerException("letter")
                 token = Token.t_ident
             else:
+                print(c)
                 raise ScannerException("invalid character")
             p += 1
         if token == Token.t_string:

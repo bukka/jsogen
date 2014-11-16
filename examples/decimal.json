@@ -1,1 +1,1 @@
-"{{decimal(scale=3, precision=5)}}"
+"{{decimal(scale=3, precision=5, scale_mask='1')}}"
