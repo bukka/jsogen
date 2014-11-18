@@ -45,7 +45,7 @@ class Template:
             val = self._parse(dl[0])
             repeat = self._get_repeat(val)
             if repeat is None:
-                repeat = 0
+                repeat = 1
             is_first = repeat > 0
             while repeat > 0:
                 for val in dl[1:]:
