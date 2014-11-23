@@ -46,7 +46,9 @@ class Template:
             repeat = self._get_repeat(val)
             if repeat is None:
                 repeat = 1
-            is_first = repeat > 0
+                is_first = False
+            else:
+                is_first = True
             while repeat > 0:
                 for val in dl[1:]:
                     if is_first:
