@@ -57,7 +57,7 @@ class Function:
         if num is None:
             num = mask_len or 1
         for i in range(0, num):
-            if i > mask_last_index:
+            if i > mask_last_index or mask[i] == '?':
                 c = str(random.randint(0, 9))
             else:
                 c = mask[i]
