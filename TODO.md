@@ -5,6 +5,9 @@
 ### recurse
 - deep objects
 
+### string
+- utf8 length is not number bytes but unicode characters
+  - possibly add argument size for bytes len
 
 ## Parser
 - array parameter type
