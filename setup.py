@@ -35,7 +35,7 @@ setup(
     ],
     entry_points = {
         'console_scripts': [
-            'glue = jsogen.jsogen:main',
+            'jsogen = jsogen.jsogen:main',
         ]
     }
 )
