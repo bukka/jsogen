@@ -1,5 +1,5 @@
 import string
-from function import Function
+from .function import Function
 
 class Expression:
     """Expression class"""

@@ -3,7 +3,7 @@ import random
 import sys
 import re
 import io
-from expression import Expression
+from .expression import Expression
 
 # compat with python 2
 if sys.version >= '3':

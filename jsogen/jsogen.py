@@ -3,7 +3,7 @@ import argparse
 import os
 from os.path import join
 import sys
-from template import Template
+from .template import Template
 
 class TemplateGenerator:
     """Generate template from supplied arguments
